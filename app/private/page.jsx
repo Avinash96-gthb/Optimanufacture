@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 
 import { createClient } from '@/utils/supabase/server'
+import { logout } from '../logout/actions'
 
 export default async function PrivatePage() {
   const supabase = createClient()
@@ -10,5 +11,15 @@ export default async function PrivatePage() {
     redirect('/login')
   }
 
-  return <p>Hello {data.user.email}</p>
+  return( 
+    <main>
+      <form action={logout}>
+        <button type="submit">
+          logout
+        </button>
+      </form>
+      <p>Hello {data.user.email}</p>
+    </main>
+  
+  )
 }
