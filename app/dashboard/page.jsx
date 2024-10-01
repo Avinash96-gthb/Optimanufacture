@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
 import { logout } from '../logout/actions';
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 
 export default function PrivatePage() {
   const [currentPrediction, setCurrentPrediction] = useState(null);
@@ -114,6 +115,9 @@ export default function PrivatePage() {
                   Logout
                 </button>
               </form>
+              <Link href="dashboard/Details" className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded transition duration-300">
+                model
+              </Link>
             </div>
           </div>
         </div>
