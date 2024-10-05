@@ -84,25 +84,19 @@ export default function personalDetails() {
     event.preventDefault();
     setLoading(true);
     setError(null);
-
+  
     try {
-      const formData = new FormData();
-      formData.append('query', `What will be the steel price trend in ${selectedMonth} ${selectedYear} for district chennai`);
-
-      const response = await fetch('http://127.0.0.1:5000/', {
-        method: 'POST',
-        body: formData,
-      });
-
+      const response = await fetch(`/api/run-docker?num_periods=5&frequency=daily`);
+  
       if (!response.ok) {
-        throw new Error('Failed to fetch custom steel price data');
+        throw new Error('Failed to fetch data from Docker API');
       }
-
+  
       const data = await response.json();
       setCustomPrediction(data);
     } catch (error) {
-      console.error('Error fetching custom steel price data:', error);
-      setError('Failed to fetch custom steel price data');
+      console.error('Error fetching data from Docker API:', error);
+      setError('Failed to fetch data from Docker API');
     } finally {
       setLoading(false);
     }
