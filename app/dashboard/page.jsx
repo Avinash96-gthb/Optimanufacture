@@ -7,21 +7,8 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
 export default function PrivatePage() {
-  const [currentPrediction, setCurrentPrediction] = useState(null);
-  const [customPrediction, setCustomPrediction] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
   const [user, setUser] = useState(null);
-  const [selectedMonth, setSelectedMonth] = useState('');
-  const [selectedYear, setSelectedYear] = useState('');
-
-  const months = [
-    'January', 'February', 'March', 'April', 'May', 'June', 
-    'July', 'August', 'September', 'October', 'November', 'December'
-  ];
-
-  const currentYear = new Date().getFullYear();
-  const years = Array.from({length: 5}, (_, i) => currentYear + i);
+  const [loading, setLoading] = useState(true); // Loading state for user fetch
 
   useEffect(() => {
     const checkUser = async () => {
@@ -32,70 +19,42 @@ export default function PrivatePage() {
       } else {
         setUser(data.user);
       }
-    };
-
-    const fetchCurrentPrediction = async () => {
-      setLoading(true);
-      try {
-        const currentDate = new Date();
-        const currentMonth = currentDate.toLocaleString('default', { month: 'long' });
-        const currentYear = currentDate.getFullYear();
-        
-        const formData = new FormData();
-        formData.append('query', `What will be the steel price trend in ${currentMonth} ${currentYear} for district chennai`);
-
-        const response = await fetch('http://127.0.0.1:5000/', {
-          method: 'POST',
-          body: formData,
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch current steel price data');
-        }
-
-        const data = await response.json();
-        setCurrentPrediction(data);
-      } catch (error) {
-        console.error('Error fetching current steel price data:', error);
-        setError('Failed to fetch current steel price data');
-      } finally {
-        setLoading(false);
-      }
+      setLoading(false); // Stop loading after checking user
     };
 
     checkUser();
-    fetchCurrentPrediction();
   }, []);
 
-  const fetchCustomPrediction = async (event) => {
-    event.preventDefault();
-    setLoading(true);
-    setError(null);
+  if (loading) return <div>Loading...</div>; // Show loading message while fetching user
 
-    try {
-      const formData = new FormData();
-      formData.append('query', `What will be the steel price trend in ${selectedMonth} ${selectedYear} for district chennai`);
+  if (!user) return null;
 
-      const response = await fetch('http://127.0.0.1:5000/', {
-        method: 'POST',
-        body: formData,
-      });
+  // Sample article data
+  const latestNews = [
+    {
+      title: "Latest Steel Market Trends",
+      imageUrl: "https://example.com/news1.jpg",
+      link: "https://example.com/news1",
+    },
+    {
+      title: "Steel Price Forecast for 2024",
+      imageUrl: "https://example.com/news2.jpg",
+      link: "https://example.com/news2",
+    },
+  ];
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch custom steel price data');
-      }
-
-      const data = await response.json();
-      setCustomPrediction(data);
-    } catch (error) {
-      console.error('Error fetching custom steel price data:', error);
-      setError('Failed to fetch custom steel price data');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (!user) return null; // or a loading spinner
+  const reportsOfTheMonth = [
+    {
+      title: "January Steel Report",
+      imageUrl: "https://example.com/report1.jpg",
+      link: "https://example.com/report1",
+    },
+    {
+      title: "February Steel Report",
+      imageUrl: "https://example.com/report2.jpg",
+      link: "https://example.com/report2",
+    },
+  ];
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -116,10 +75,10 @@ export default function PrivatePage() {
                 </button>
               </form>
               <Link href="dashboard/Details" className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded transition duration-300">
-                model
+                Model
               </Link>
               <Link href="dashboard/Graphs" className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded transition duration-300">
-                graphs
+                Graphs
               </Link>
             </div>
           </div>
@@ -128,67 +87,40 @@ export default function PrivatePage() {
 
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
-          <div className="border-4 border-dashed border-gray-200 rounded-lg p-6 mb-6">
-            <h2 className="text-2xl font-bold mb-4">Current Month Steel Price Prediction</h2>
-            {loading && !currentPrediction ? (
-              <p>Loading current prediction...</p>
-            ) : error ? (
-              <p className="text-red-500">{error}</p>
-            ) : currentPrediction ? (
-              <div>
-                <p className="mb-2"><strong>Message:</strong> {currentPrediction.message}</p>
-                <p className="mb-2"><strong>Predicted Close:</strong> {currentPrediction.predicted_close.toFixed(2)} $</p>
-                <p><strong>Result:</strong> {currentPrediction.result}</p>
-              </div>
-            ) : (
-              <p>No current prediction available</p>
-            )}
+          <h2 className="text-2xl font-bold mb-4">Important Articles</h2>
+          
+          {/* Latest News Section */}
+          <div className="mb-6">
+            <h3 className="text-xl font-bold mb-2">Latest News</h3>
+            <div className="flex space-x-4 overflow-x-auto">
+              {latestNews.map((article, index) => (
+                <Link key={index} href={article.link} className="flex-shrink-0">
+                  <img 
+                    src={article.imageUrl} 
+                    alt={article.title} 
+                    className="h-40 w-64 object-cover rounded-lg"
+                  />
+                  <p className="text-center mt-2">{article.title}</p>
+                </Link>
+              ))}
+            </div>
           </div>
 
-          <div className="border-4 border-dashed border-gray-200 rounded-lg p-6">
-            <h2 className="text-2xl font-bold mb-4">Custom Steel Price Prediction</h2>
-            
-            <form onSubmit={fetchCustomPrediction} className="mb-4">
-              <div className="flex space-x-4">
-                <select 
-                  value={selectedMonth} 
-                  onChange={(e) => setSelectedMonth(e.target.value)}
-                  className="border rounded px-2 py-1"
-                  required
-                >
-                  <option value="">Select Month</option>
-                  {months.map(month => (
-                    <option key={month} value={month}>{month}</option>
-                  ))}
-                </select>
-                <select 
-                  value={selectedYear} 
-                  onChange={(e) => setSelectedYear(e.target.value)}
-                  className="border rounded px-2 py-1"
-                  required
-                >
-                  <option value="">Select Year</option>
-                  {years.map(year => (
-                    <option key={year} value={year}>{year}</option>
-                  ))}
-                </select>
-                <button 
-                  type="submit" 
-                  className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition duration-300"
-                  disabled={loading}
-                >
-                  {loading ? 'Loading...' : 'Get Prediction'}
-                </button>
-              </div>
-            </form>
-
-            {customPrediction && (
-              <div>
-                <p className="mb-2"><strong>Message:</strong> {customPrediction.message}</p>
-                <p className="mb-2"><strong>Predicted Close:</strong> {customPrediction.predicted_close.toFixed(2)} $</p>
-                <p><strong>Result:</strong> {customPrediction.result}</p>
-              </div>
-            )}
+          {/* Reports of the Month Section */}
+          <div>
+            <h3 className="text-xl font-bold mb-2">Reports of the Month</h3>
+            <div className="flex space-x-4 overflow-x-auto">
+              {reportsOfTheMonth.map((report, index) => (
+                <Link key={index} href={report.link} className="flex-shrink-0">
+                  <img 
+                    src={report.imageUrl} 
+                    alt={report.title} 
+                    className="h-40 w-64 object-cover rounded-lg"
+                  />
+                  <p className="text-center mt-2">{report.title}</p>
+                </Link>
+              ))}
+            </div>
           </div>
         </div>
       </main>
