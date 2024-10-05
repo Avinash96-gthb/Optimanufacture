@@ -2,7 +2,7 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
 import { logout } from '@/app/logout/actions';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 
 export default function personalDetails() {
@@ -11,6 +11,7 @@ export default function personalDetails() {
   const [user, setUser] = useState(null);
   const [chatMessages, setChatMessages] = useState([]); // Store chatbot conversation
   const [userMessage, setUserMessage] = useState(''); // Track user input
+  const chatContainerRef = useRef(null); // Ref for chat container to scroll
 
   useEffect(() => {
     const checkUser = async () => {
@@ -25,6 +26,13 @@ export default function personalDetails() {
 
     checkUser();
   }, []);
+
+  useEffect(() => {
+    // Scroll to the bottom when chatMessages update
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
+  }, [chatMessages]);
 
   // Function to fetch custom steel price prediction (chatbot response)
   const fetchCustomPrediction = async (event) => {
@@ -96,6 +104,12 @@ export default function personalDetails() {
               >
                 Home
               </Link>
+              <Link
+                href="/dashboard/Graphs"
+                className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded transition duration-300"
+              >
+                Graphs
+              </Link>
             </div>
           </div>
         </div>
@@ -106,7 +120,10 @@ export default function personalDetails() {
           {/* Chatbot Interface */}
           <div className="border-4 border-dashed border-gray-200 rounded-lg p-6 mb-6">
             <h2 className="text-2xl font-bold mb-4">Chatbot</h2>
-            <div className="h-96 overflow-y-auto border border-gray-300 p-4 mb-4 rounded-lg bg-white">
+            <div
+              ref={chatContainerRef}
+              className="h-96 overflow-y-auto border border-gray-300 p-4 mb-4 rounded-lg bg-white"
+            >
               {chatMessages.map((message, index) => (
                 <div
                   key={index}

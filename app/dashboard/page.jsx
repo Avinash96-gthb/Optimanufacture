@@ -118,6 +118,9 @@ export default function PrivatePage() {
               <Link href="dashboard/Details" className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded transition duration-300">
                 model
               </Link>
+              <Link href="dashboard/Graphs" className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded transition duration-300">
+                graphs
+              </Link>
             </div>
           </div>
         </div>
