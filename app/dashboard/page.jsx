@@ -32,15 +32,20 @@ export default function PrivatePage() {
   // Sample article data
   const latestNews = [
     {
-      title: "Latest Steel Market Trends",
-      imageUrl: "https://example.com/news1.jpg",
-      link: "https://example.com/news1",
+      title: "Thyssenkrup loses legal fight!!",
+      imageUrl: "https://steelindustry.news/wp-content/uploads/2024/09/imports3-750x375.jpg",
+      link: "https://www.moneycontrol.com/news/business/companies/thyssenkrupp-loses-legal-fight-against-eu-antitrust-veto-of-tata-steel-jv-12835518.html",
     },
     {
-      title: "Steel Price Forecast for 2024",
-      imageUrl: "https://example.com/news2.jpg",
-      link: "https://example.com/news2",
+      title: "Indian steel majors best placed steel producers",
+      imageUrl: "https://bsmedia.business-standard.com/_media/bs/img/article/2023-12/20/full/1703051689-4937.jpg?im=FitAndFill(826,465)",
+      link: "https://auto.economictimes.indiatimes.com/news/industry/indian-steel-majors-best-placed-producers-globally-nomura/113905805",
     },
+    {
+      title: "Latest steel news",
+      imageUrl: "https://images.moneycontrol.com/static-mcnews/2022/10/Steel-770x433.jpg?impolicy=website&width=770&height=431",
+      link: "https://www.steelorbis.com/steel-news/latest-news/",
+    }
   ];
 
   const reportsOfTheMonth = [
@@ -92,13 +97,13 @@ export default function PrivatePage() {
           {/* Latest News Section */}
           <div className="mb-6">
             <h3 className="text-xl font-bold mb-2">Latest News</h3>
-            <div className="flex space-x-4 overflow-x-auto">
+            <div className="flex space-x-20 overflow-x-auto">
               {latestNews.map((article, index) => (
-                <Link key={index} href={article.link} className="flex-shrink-0">
+                <Link key={index} href={article.link} className="flex-shrink-0" target="_blank" rel="noopener noreferrer">
                   <img 
                     src={article.imageUrl} 
                     alt={article.title} 
-                    className="h-40 w-64 object-cover rounded-lg"
+                    className="h-60 w-80 object-cover rounded-lg"
                   />
                   <p className="text-center mt-2">{article.title}</p>
                 </Link>

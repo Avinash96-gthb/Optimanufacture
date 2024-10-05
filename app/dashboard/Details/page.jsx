@@ -5,13 +5,13 @@ import { logout } from '@/app/logout/actions';
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 
-export default function personalDetails() {
+export default function PersonalDetails() {
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
   const [user, setUser] = useState(null);
-  const [chatMessages, setChatMessages] = useState([]); // Store chatbot conversation
-  const [userMessage, setUserMessage] = useState(''); // Track user input
-  const chatContainerRef = useRef(null); // Ref for chat container to scroll
+  const [error, setError] = useState(null);
+  const [chatMessages, setChatMessages] = useState([]);
+  const [userMessage, setUserMessage] = useState('');
+  const chatContainerRef = useRef(null);
 
   useEffect(() => {
     const checkUser = async () => {
@@ -28,53 +28,52 @@ export default function personalDetails() {
   }, []);
 
   useEffect(() => {
-    // Scroll to the bottom when chatMessages update
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
   }, [chatMessages]);
 
-  // Function to fetch custom steel price prediction (chatbot response)
   const fetchCustomPrediction = async (event) => {
     event.preventDefault();
     if (!userMessage.trim()) return;
-
+  
     setLoading(true);
     setError(null);
-
+  
     // Add user's message to the chat
     setChatMessages((prevMessages) => [
       ...prevMessages,
       { role: 'user', content: userMessage },
     ]);
-
+  
     try {
-      // Call the Docker API running on localhost:5000
-      const response = await fetch(
-        `http://localhost:5000/predict?num_periods=5&frequency=daily`,
-        { method: 'GET' }
-      );
-
+      // Make a request to your API route
+      const response = await fetch('/api', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ message: userMessage }),
+      });
+  
       if (!response.ok) {
-        throw new Error('Failed to fetch steel price prediction');
+        throw new Error(`Error: ${response.status}`);
       }
-
-      const data = await response.json();
-
-      // Add the chatbot's response to the chat
+  
+      const botMessage = await response.json();
       setChatMessages((prevMessages) => [
         ...prevMessages,
-        { role: 'bot', content: `Prediction: ${data.predicted_close.toFixed(2)} $` },
+        { role: 'bot', content: botMessage },
       ]);
     } catch (error) {
-      console.error('Error fetching custom steel price data:', error);
+      console.error('Error fetching chatbot response:', error);
       setChatMessages((prevMessages) => [
         ...prevMessages,
-        { role: 'bot', content: 'Error fetching custom steel price data.' },
+        { role: 'bot', content: `Error: ${error.message}` },
       ]);
     } finally {
       setLoading(false);
-      setUserMessage(''); // Clear user input
+      setUserMessage('');
     }
   };
 
@@ -85,9 +84,7 @@ export default function personalDetails() {
       <nav className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div className="flex-shrink-0 flex items-center">
-              <h1 className="text-xl font-bold text-gray-800">Chatbot</h1>
-            </div>
+            <h1 className="text-xl font-bold text-gray-800">Chatbot</h1>
             <div className="flex items-center">
               <span className="text-gray-600 mr-4">Hello, {user.email}</span>
               <form action={logout}>
@@ -98,16 +95,10 @@ export default function personalDetails() {
                   Logout
                 </button>
               </form>
-              <Link
-                href="/dashboard"
-                className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded transition duration-300"
-              >
+              <Link href="/dashboard" className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded transition duration-300">
                 Home
               </Link>
-              <Link
-                href="/dashboard/Graphs"
-                className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded transition duration-300"
-              >
+              <Link href="/dashboard/Graphs" className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded transition duration-300">
                 Graphs
               </Link>
             </div>
@@ -117,7 +108,6 @@ export default function personalDetails() {
 
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
-          {/* Chatbot Interface */}
           <div className="border-4 border-dashed border-gray-200 rounded-lg p-6 mb-6">
             <h2 className="text-2xl font-bold mb-4">Chatbot</h2>
             <div
@@ -125,19 +115,8 @@ export default function personalDetails() {
               className="h-96 overflow-y-auto border border-gray-300 p-4 mb-4 rounded-lg bg-white"
             >
               {chatMessages.map((message, index) => (
-                <div
-                  key={index}
-                  className={`mb-2 ${
-                    message.role === 'user' ? 'text-right' : 'text-left'
-                  }`}
-                >
-                  <p
-                    className={`inline-block p-2 rounded-lg ${
-                      message.role === 'user'
-                        ? 'bg-blue-500 text-white'
-                        : 'bg-gray-300 text-black'
-                    }`}
-                  >
+                <div key={index} className={`mb-2 ${message.role === 'user' ? 'text-right' : 'text-left'}`}>
+                  <p className={`inline-block p-2 rounded-lg ${message.role === 'user' ? 'bg-blue-500 text-white' : 'bg-gray-300 text-black'}`}>
                     {message.content}
                   </p>
                 </div>
@@ -151,7 +130,6 @@ export default function personalDetails() {
               )}
             </div>
 
-            {/* User Input */}
             <form onSubmit={fetchCustomPrediction} className="flex">
               <input
                 type="text"
