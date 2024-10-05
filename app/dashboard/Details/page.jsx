@@ -84,23 +84,31 @@ export default function personalDetails() {
     event.preventDefault();
     setLoading(true);
     setError(null);
-  
+
     try {
-      const response = await fetch(`/api/run-docker?num_periods=5&frequency=daily`);
-  
-      if (!response.ok) {
-        throw new Error('Failed to fetch data from Docker API');
-      }
-  
-      const data = await response.json();
-      setCustomPrediction(data);
+        // Define the number of periods and frequency for the prediction
+        const numPeriods = 5; // Example value, can be dynamic
+        const frequency = 'daily'; // Example value, can be dynamic
+
+        // Call the Docker API running on localhost:5000
+        const response = await fetch(`http://localhost:5000/predict?num_periods=${numPeriods}&frequency=${frequency}`, {
+            method: 'GET', // Assuming the API uses a GET request
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.message || 'Failed to fetch steel price prediction');
+        }
+
+        const data = await response.json();
+        setCustomPrediction(data);
     } catch (error) {
-      console.error('Error fetching data from Docker API:', error);
-      setError('Failed to fetch data from Docker API');
+        console.error('Error fetching custom steel price data:', error);
+        setError('Failed to fetch custom steel price data');
     } finally {
-      setLoading(false);
+        setLoading(false);
     }
-  };
+};
 
   if (!user) return null;
 
