@@ -6,6 +6,7 @@ import datetime
 from statsmodels.tsa.arima.model import ARIMA
 import requests
 from fastapi.middleware.cors import CORSMiddleware
+import re
 
 origins = [
     "*"  # Allow all origins (use with caution)
@@ -29,8 +30,7 @@ class ChatRequest(BaseModel):
     prompt: str
     start_date: str
     end_date: str
-    prediction_start_date: str
-    prediction_end_date: str
+    
 
 # Function to fetch steel prices
 def fetch_steel_prices(start_date, end_date, conversion_rate):
@@ -138,9 +138,13 @@ async def chatbot(request: ChatRequest):
         # Parse date inputs
         start_date = datetime.datetime.strptime(request.start_date, '%d-%m-%Y')
         end_date = datetime.datetime.strptime(request.end_date, '%d-%m-%Y')
-        prediction_start_date = datetime.datetime.strptime(request.prediction_start_date, '%d-%m-%Y')
-        prediction_end_date = datetime.datetime.strptime(request.prediction_end_date, '%d-%m-%Y')
         conversion_rate = 83.0  # Conversion rate as INR
+        date_pattern = r'\b(\d{2}-\d{2}-\d{4})\b'
+
+        matches = re.findall(date_pattern, request.prompt)
+        if len(matches)>=2:
+            prediction_start_date = matches[0]
+            prediction_end_date = matches[1]
 
         # Fetch steel prices
         data = fetch_steel_prices(start_date, end_date, conversion_rate)
