@@ -6,6 +6,10 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Markdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+<<<<<<< HEAD
+=======
+
+>>>>>>> 90bc2c8ea2c5b48ea4d7eb29ee51ef0ae31dd6cc
 
 
 export default function personalDetails() {
@@ -41,15 +45,23 @@ export default function personalDetails() {
   const fetchCustomPrediction = async (event) => {
     event.preventDefault();
     if (!userMessage.trim()) return;
+<<<<<<< HEAD
 
     setLoading(true);
     setError(null);
 
+=======
+ 
+    setLoading(true);
+    setError(null);
+ 
+>>>>>>> 90bc2c8ea2c5b48ea4d7eb29ee51ef0ae31dd6cc
     // Add user's message to the chat
     setChatMessages((prevMessages) => [
       ...prevMessages,
       { role: 'user', content: userMessage },
     ]);
+<<<<<<< HEAD
 
     try {
       // Call the Docker API running on localhost:5000
@@ -58,9 +70,28 @@ export default function personalDetails() {
         { method: 'GET' }
       );
 
+=======
+ 
+    try {
+      // Make a request to your API route
+      const response = await fetch('http://127.0.0.1:8000/chatbot/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        
+        body: JSON.stringify({
+          prompt: userMessage,
+          start_date: "01-01-2019", // Example start date (you may want to dynamically set this)
+          end_date: "01-10-2024"   // Example end date (you may want to dynamically set this
+        }),
+      });
+ 
+>>>>>>> 90bc2c8ea2c5b48ea4d7eb29ee51ef0ae31dd6cc
       if (!response.ok) {
         throw new Error('Failed to fetch steel price prediction');
       }
+<<<<<<< HEAD
 
       const data = await response.json();
 
@@ -69,6 +100,17 @@ export default function personalDetails() {
         ...prevMessages,
         { role: 'bot', content: `Prediction: ${data.predicted_close.toFixed(2)} $` },
       ]);
+=======
+ 
+      const botMessage = await response.json();
+   
+    // Ensure proper line breaks in the LLM output by adding double line breaks for paragraphs
+      const formattedBotMessage = botMessage["llm_output"];
+      setChatMessages((prevMessages) => [
+        ...prevMessages,
+        { role: 'bot', content: formattedBotMessage },
+      ]); 
+>>>>>>> 90bc2c8ea2c5b48ea4d7eb29ee51ef0ae31dd6cc
     } catch (error) {
       console.error('Error fetching custom steel price data:', error);
       setChatMessages((prevMessages) => [
@@ -128,6 +170,7 @@ export default function personalDetails() {
               className="h-96 overflow-y-auto border border-gray-300 p-4 mb-4 rounded-lg bg-white"
             >
               {chatMessages.map((message, index) => (
+<<<<<<< HEAD
                 <div
                   key={index}
                   className={`mb-2 ${
@@ -143,6 +186,12 @@ export default function personalDetails() {
                   >
                   <Markdown remarkPlugins={[remarkGfm]}>{message.content}</Markdown>
                   </p>
+=======
+                <div key={index} className={`mb-2 ${message.role === 'user' ? 'text-right' : 'text-left'}`}>
+                  <div className={`inline-block p-2 rounded-lg ${message.role === 'user' ? 'bg-blue-500 text-white' : 'bg-gray-300 text-black'}`}>
+                    <Markdown remarkPlugins={[remarkGfm]}>{message.content}</Markdown>
+                  </div>
+>>>>>>> 90bc2c8ea2c5b48ea4d7eb29ee51ef0ae31dd6cc
                 </div>
               ))}
               {loading && (

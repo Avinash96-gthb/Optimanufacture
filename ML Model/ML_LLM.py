@@ -1,38 +1,12 @@
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
 import pandas as pd
 import yfinance as yf
 import datetime
 from statsmodels.tsa.arima.model import ARIMA
 import requests
-from fastapi.middleware.cors import CORSMiddleware
-import re
 
-origins = [
-    "*"  # Allow all origins (use with caution)
-]
+# LM Studio API URL
+LM_STUDIO_API_URL = "http://127.0.0.1:1233/v1/chat/completions"
 
-# Initialize FastAPI app
-app = FastAPI()
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,  # List of allowed origins
-    allow_credentials=True,  # Allow cookies and authentication headers
-    allow_methods=["*"],  # Allow all HTTP methods (GET, POST, PUT, DELETE, etc.)
-    allow_headers=["*"],  # Allow all headers
-)
-
-# Constants
-LM_STUDIO_API_URL = "http://127.0.0.1:1233/v1/chat/completions"  # Local URL for LM Studio API
-
-# Request model for chatbot input
-class ChatRequest(BaseModel):
-    prompt: str
-    start_date: str
-    end_date: str
-    
-
-# Function to fetch steel prices
 def fetch_steel_prices(start_date, end_date, conversion_rate):
     ticker = 'SLX' 
 
@@ -102,9 +76,6 @@ def filter_llm_response(prompt):
     else:
         return False
 
-
-
-
 def get_llm_insight(predictions, prompt):
     if not filter_llm_response(prompt):
         print("The question is outside the scope of steel price prediction.")
@@ -112,13 +83,12 @@ def get_llm_insight(predictions, prompt):
 
     print("Sending the following predictions to LM Studio API:")
     print(predictions)
-  
+
     payload = {
-        "model": "llama-3.2-1b-instruct",
+        "model": "mistral-7b-instruct-v0.2",
         "messages": [
-            {"role": "system", "content": "format the output in paragraph format so that dummies can understand in less than 3 lines, use markdown"},
             {"role": "user", "content": prompt},
-            {"role": "user", "content": predictions}
+            {"role": "assistant", "content": predictions}
         ],
         "temperature": 0.7,
         "max_tokens": 512
@@ -131,56 +101,45 @@ def get_llm_insight(predictions, prompt):
         result = response.json()
         print("LM Studio Insight:")
         print(result['choices'][0]['message']['content'])
-        return result['choices'][0]['message']['content']
 
     except requests.exceptions.RequestException as e:
         print(f"An error occurred while getting insight from LM Studio: {e}")
 
+if __name__ == "__main__":
+   
+    start_date_input = "01-01-2019"
+    end_date_input = "01-10-2024"
 
+    start_date = datetime.datetime.strptime(start_date_input, '%d-%m-%Y')
+    end_date = datetime.datetime.strptime(end_date_input, '%d-%m-%Y')
 
+    conversion_rate = 83.0 
+    data = fetch_steel_prices(start_date, end_date, conversion_rate)
 
+    if data is not None:
+       
+        prediction_start_date_input = input("Enter the start date for prediction (dd-mm-yyyy): ").strip()
+        prediction_end_date_input = input("Enter the end date for prediction (dd-mm-yyyy): ").strip()
 
+        try:
+            prediction_start_date = datetime.datetime.strptime(prediction_start_date_input, '%d-%m-%Y')
+            prediction_end_date = datetime.datetime.strptime(prediction_end_date_input, '%d-%m-%Y')
+            
+            num_periods = (prediction_end_date - prediction_start_date).days + 1
+            
+            if num_periods < 1:
+                print("The end date must be after the start date.")
+                raise ValueError
+            
+            frequency = 'daily'  
+            print(f"Predictions will be made from {prediction_start_date.strftime('%d/%m/%Y')} to {prediction_end_date.strftime('%d/%m/%Y')}.")
 
-
-
-
-
-@app.post("/chatbot/")
-async def chatbot(request: ChatRequest):
-    try:
-        # Parse date inputs
-        start_date = datetime.datetime.strptime(request.start_date, '%d-%m-%Y')
-        end_date = datetime.datetime.strptime(request.end_date, '%d-%m-%Y')
-        conversion_rate = 83.0  # Conversion rate as INR
-        date_pattern = r'\b(\d{2}-\d{2}-\d{4})\b'
-
-        matches = re.findall(date_pattern, request.prompt)
-        if len(matches)>=2:
-            prediction_start_date = datetime.datetime.strptime(matches[0], '%d-%m-%Y')
-            prediction_end_date = datetime.datetime.strptime(matches[1], '%d-%m-%Y')
-        else:
-            return {"llm_output": "I can provide predictions for steel prices only if you give me the dates you want it for, please provide dates","arima_predictions": "lol nothing"}
-
-        # Fetch steel prices
-        data = fetch_steel_prices(start_date, end_date, conversion_rate)
-        if data is None:
-            raise HTTPException(status_code=404, detail="No steel price data found for the specified date range.")
-
-        # Calculate number of periods for ARIMA model
-        num_periods = (prediction_end_date - prediction_start_date).days + 1
-        if num_periods < 1:
-            raise HTTPException(status_code=400, detail="The end date must be after the start date.")
-
-        # Get ARIMA predictions
-        predictions = predict_price_with_arima(data, num_periods, 'daily', conversion_rate, prediction_start_date)
-
-        # Send predictions to LLM and get insight
-        llm_output = get_llm_insight(predictions, request.prompt)
-
-        # Return response
-        return {"llm_output": llm_output, "arima_predictions": predictions}
-
-    except ValueError as ve:
-        raise HTTPException(status_code=400, detail=f"Invalid date format: {ve}")
-
-# Example of how to run: Use `uvicorn filename:app --reload` to start the FastAPI app
+     
+            predictions = predict_price_with_arima(data, num_periods, frequency, conversion_rate, prediction_start_date)
+           
+            user_prompt = f"What is the price of steel from {prediction_start_date_input} to {prediction_end_date_input}?"
+            
+            get_llm_insight(predictions, user_prompt)
+            
+        except ValueError as ve:
+            print(f"Invalid input: {ve}")
