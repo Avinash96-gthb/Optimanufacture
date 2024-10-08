@@ -4,6 +4,9 @@ import { createClient } from '@/utils/supabase/client';
 import { logout } from '@/app/logout/actions';
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import Markdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
+
 
 export default function personalDetails() {
   const [loading, setLoading] = useState(false);
@@ -138,7 +141,7 @@ export default function personalDetails() {
                         : 'bg-gray-300 text-black'
                     }`}
                   >
-                    {message.content}
+                  <Markdown remarkPlugins={[remarkGfm]}>{message.content}</Markdown>
                   </p>
                 </div>
               ))}
