@@ -56,9 +56,7 @@ export default function PersonalDetails() {
         body: JSON.stringify({ 
           message: userMessage,
           start_date: "01-01-2019", // Example start date (you may want to dynamically set this)
-          end_date: "01-10-2024",   // Example end date (you may want to dynamically set this)
-          prediction_start_date: "02-10-2024", // Example prediction start date
-          prediction_end_date: "02-11-2024" 
+          end_date: "01-10-2024"   // Example end date (you may want to dynamically set this
         }),
       });
   
