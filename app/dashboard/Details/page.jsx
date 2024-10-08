@@ -65,6 +65,9 @@ export default function PersonalDetails() {
       }
   
       const botMessage = await response.json();
+    
+    // Ensure proper line breaks in the LLM output by adding double line breaks for paragraphs
+      const formattedBotMessage = botMessage["llm_output"].replace(/(?:\r\n|\r|\n)/g, '\n\n');
       setChatMessages((prevMessages) => [
         ...prevMessages,
         { role: 'bot', content: botMessage },
