@@ -51,13 +51,13 @@ export default function PrivatePage() {
   const reportsOfTheMonth = [
     {
       title: "January Steel Report",
-      imageUrl: "https://example.com/report1.jpg",
-      link: "https://example.com/report1",
+      imageUrl: "https://image.vietnamnews.vn/uploadvnnews/Article/2017/7/19/steel499105744AM.jpg",
+      link: "https://www.steelorbis.com/steel-news/latest-news/",
     },
     {
-      title: "February Steel Report",
-      imageUrl: "https://example.com/report2.jpg",
-      link: "https://example.com/report2",
+      title: "Metal stocks report",
+      imageUrl: "https://images.moneycontrol.com/static-mcnews/2022/10/Steel-770x433.jpg?impolicy=website&width=770&height=431",
+      link: "https://www.financialexpress.com/market/metal-stocks-nmdc-vedanta-tata-steel-moil-hindalco-jsw-steel-surge-3-amidst-rising-iron-ore-prices-3626005/",
     },
   ];
 
@@ -114,13 +114,13 @@ export default function PrivatePage() {
           {/* Reports of the Month Section */}
           <div>
             <h3 className="text-xl font-bold mb-2">Reports of the Month</h3>
-            <div className="flex space-x-4 overflow-x-auto">
+            <div className="flex space-x-20 overflow-x-auto">
               {reportsOfTheMonth.map((report, index) => (
-                <Link key={index} href={report.link} className="flex-shrink-0">
+                <Link key={index} href={report.link} className="flex-shrink-0" target="_blank" rel="noopener noreferrer">
                   <img 
                     src={report.imageUrl} 
                     alt={report.title} 
-                    className="h-40 w-64 object-cover rounded-lg"
+                    className="h-60 w-80 object-cover rounded-lg"
                   />
                   <p className="text-center mt-2">{report.title}</p>
                 </Link>
